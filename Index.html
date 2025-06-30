@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combined HTML Report</title>
+  <style>
+    /* Styles for Print Media */
+    @media print {
+      /* Overriding default margins and setting specific page margins for print */
+      @page {
+        margin: 10mm 15mm 10mm 15mm; /* Top: 10mm, Right: 15mm, Bottom: 10mm, Left: 15mm */
+        size: A4 portrait; /* Set page size to A4 portrait */
+      }
+      body {
+        margin: 0 !important; /* Remove any residual body margins */
+      }
+      /* Content containers should not have fixed width if @page margin is applied,
+         otherwise they will be smaller than expected.
+         Setting width to 100% of available space after page margins. */
+      .four-hands-body, .drawer-body, .excel-report-container {
+        width: 100% !important; /* Take full available width within page margins */
+        height: auto !important; /* Allow height to adjust automatically */
+        margin: 0 auto !important; /* Center the content horizontally */
+        padding: 0 !important; /* Remove internal padding for max width */
+      }
+      /* Attempt to hide browser-generated headers/footers.
+         Note: This is browser-dependent and may require user action (e.g., deselecting "Headers and footers" in print settings). */
+      header, footer, nav, aside {
+        display: none !important;
+      }
+
+      /* Modified: Confidential Header - Hidden for print */
+      .confidential-header {
+        display: none !important; /* Ẩn dòng chữ này khi in */
+      }
+
+      /* New: Hide "Product Test Report (from Trang3.html)" when printing */
+      .excel-report-container h2 {
+        display: none !important;
+      }
+    }
+
+    /* General Body Styles (for screen display) */
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 10px; /* Base font size from Trang3, applied globally */
+      margin: 0; /* Đảm bảo không có margin mặc định từ body */
+      padding: 0; /* Đảm bảo không có padding mặc định từ body */
+    }
+
+    /* Styles for main content containers */
+    .four-hands-body, .drawer-body, .excel-report-container {
+      margin: 0 auto;
+      padding: 10px; /* Thêm padding nhẹ để nội dung không dính sát viền */
+      max-width: 95%; /* Đặt max-width theo phần trăm */
+      width: 100%; /* Đảm bảo sử dụng toàn bộ chiều rộng có sẵn */
+      box-sizing: border-box; /* Quan trọng để padding không làm tăng chiều rộng tổng thể */
+    }
+    
+    /* SPECIFICALLY FOR CONSISTENT WIDTH: Apply max-width to four-hands-body as well */
+    .four-hands-body {
+        max-width: 800px; /* Cùng kích thước tối đa với drawer-body và excel-report-container */
+    }
+
+    /* Existing styles for drawer-body and excel-report-container already have max-width */
+    .drawer-body {
+      max-width: 800px;
+      background-color: #f2f2f2;
+      box-sizing: border-box;
+    }
+    .excel-report-container {
+      max-width: 800px;
+      box-sizing: border-box;
+    }
+
+    /* Điều chỉnh font-size cho màn hình nhỏ hơn để dễ đọc */
+    @media (max-width: 768px) {
+        body {
+            font-size: 12px; /* Tăng kích thước font trên thiết bị di động */
+        }
+        .four-hands-body, .drawer-body, .excel-report-container {
+            padding: 5px; /* Giảm padding trên thiết bị di động */
+        }
+        .four-hands-table, .drawer-table, .excel-report-container table {
+            font-size: 0.9em; /* Giảm kích thước font cho bảng trên thiết bị di động */
+        }
+        .four-hands-th, .four-hands-td, .drawer-th, .drawer-td {
+            padding: 4px; /* Giảm padding cho các ô bảng */
+        }
+        .image-cell img {
+            max-height: 200px; /* Giảm chiều cao tối đa của ảnh trên di động */
+        }
+        .unit-input {
+            width: 60px; /* Giảm chiều rộng input đơn vị */
+        }
+        .filter-controls {
+            flex-direction: column; /* Xếp các bộ lọc theo chiều dọc trên di động */
+            align-items: flex-start;
+        }
+        .filter-controls label, .filter-controls button {
+            width: 100%; /* Chiều rộng đầy đủ cho các điều khiển lọc */
+            margin-bottom: 5px;
+        }
+    }
+
+    /* Điều chỉnh cho màn hình rất nhỏ (ví dụ: điện thoại cũ) */
+    @media (max-width: 480px) {
+        body {
+            font-size: 10px;
+        }
+        .four-hands-h1, .four-hands-h2 {
+            font-size: 1.2em; /* Giảm kích thước tiêu đề */
+        }
+        .sub-header {
+            font-size: 1em;
+        }
+        /* Đảm bảo các input và select không tràn ra ngoài */
+        input[type="text"], input[type="number"], input[type="date"], textarea, select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+    
+    /* Các style còn lại giữ nguyên như cũ */
+    .four-hands-h1, .four-hands-h2 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .sub-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 15px;
+    }
+    .four-hands-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .four-hands-th, .four-hands-td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .no-border td {
+      border: none;
+      padding: 4px 8px;
+    }
+    .image-cell {
+      text-align: center;
+    }
+    .image-cell img {
+      max-height: 350px; /* Increased by 1.5 times (170px * 1.5 = 255px) */
+      max-width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    label.upload {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #eee;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .image-upload-container {
+      margin-bottom: 10px;
+    }
+    .image-upload-block {
+      display: inline-block;
+      margin: 10px;
+    }
+    .section-title {
+      background: #f0f0f0;
+      font-weight: bold;
+      text-align: center;
+    }
+    textarea {
+      width: 100%;
+      resize: none;
+      line-height: 1.2;
+    }
+    select {
+      width: 100%;
+    }
+    .signature-cell { /* New class for signature cells */
+      height: 35px; /* Further reduced height */
+      vertical-align: bottom; /* Aligns content to the bottom */
+      font-weight: bold;
+    }
+    .signature-cell input[type="text"] {
+      text-align: center;
+      border: none;
+      border-bottom: 1px solid #000; /* Signature line */
+      width: 95%; /* Adjusted width for the line from 80% to 95% */
+      padding: 0; /* Remove default padding */
+      margin-bottom: 2px; /* Small margin from the bottom of cell */
+      background-color: transparent; /* Make background transparent */
+      display: block; /* Ensures input takes full width and allows margin auto */
+      margin: 0 auto; /* Centers the input horizontally */
+    }
+    .signature-cell input[type="text"][disabled] {
+      color: inherit; /* Maintain text color */
+      opacity: 1; /* Ensure text is not faded */
+      -webkit-text-fill-color: currentcolor; /* For some browsers */
+    }
+    .test-result-select {
+      width: 100%;
+      padding: 5px;
+      font-weight: bold;
+      color: black;
+    }
+
+    /* Adjust margin for General Info table - removed as signature table is moved */
+    .general-info-table {
+        margin-top: 20px; /* Reset to a standard margin */
+    }
+    
+    /* Removed page-break-section as it's no longer needed for the product dimensions table */
+    /* .page-break-section {
+        page-break-before: always;
+    } */
+
+    /* Styles from Trang2.html */
+    .drawer-body {
+      /* Removed fixed width to allow responsiveness */
+      /* width: 210mm; */
+      max-width: 800px; /* Retain max-width for larger screens */
+      background-color: #f2f2f2;
+      box-sizing: border-box;
+      /* Removed page-break-before: always; */
+    }
+    #drawerHeader {
+      background-color: #e0e0e0;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 12px;
+    }
+    #drawerHeader span { /* Specific style for the title text */
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .toggle-btn {
+      background-color: #fff;
+      border: 1px solid #999;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .drawer-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      margin-top: 10px;
+      border: 1px solid #000 !important; /* Added border for the table itself */
+    }
+    .drawer-th { /* Modified styles for table headers (Drawer Style #1) */
+      background-color: #e0e0e0; /* Gray background */
+      color: #555; /* Gray text color */
+      font-size: 1.1em; /* Cỡ chữ được thay đổi ở đây */
+      font-weight: normal; /* Removed bold */
+      border: 1px solid #000 !important; /* Added !important for visibility */
+      padding: 5px;
+      text-align: center;
+    }
+    .drawer-th:first-child { /* Increased width for the 'Title' column */
+      width: 15%;
+    }
+    .drawer-td {
+      border: 1px solid #000 !important; /* Added !important for visibility */
+      padding: 5px;
+      text-align: center;
+    }
+    td.label-cell { /* Applies to Description, Drawer Qty, Inside Width etc. */
+      text-align: left;
+      font-weight: normal; /* Changed to normal to match drawer-th (Drawer Style #1) */
+      font-size: 0.9em; /* Changed to 0.9em to match drawer-th (Drawer Style #1) */
+      border: 1px solid #000 !important; /* Ensure border for label cells */
+    }
+    .note {
+      font-size: 0.9em;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .horizontal {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+    .unit-input {
+      width: 80px;
+      box-sizing: border-box;
+    }
+    .unit-label {
+      font-size: 0.85em;
+      margin-left: 4px;
+      margin-right: 8px;
+      color: #555;
+    }
+    .full-input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input[disabled] {
+      background-color: #eaeaea;
+    }
+
+    /* Styles for Trang3.html content wrapper */
+    .excel-report-container {
+      /* Removed fixed width to allow responsiveness */
+      /* width: 210mm; */
+      max-width: 800px; /* Retain max-width for larger screens */
+      box-sizing: border-box;
+      /* Removed page-break-before: always; */
+    }
+
+    /* Styles from Trang3.html - modified for consistency within .excel-report-container */
+    .excel-report-container table { width: 100%; border-collapse: collapse; margin-top: 10px; page-break-inside: auto; }
+    .excel-report-container tr { page-break-inside: avoid; page-break-after: auto; }
+    .excel-report-container th, .excel-report-container td { border: 1px solid #ccc; padding: 4px; vertical-align: top; text-align: left; }
+    .excel-report-container th:nth-child(1), .excel-report-container td:nth-child(1) { width: 2%; }
+    .excel-report-container th:nth-child(5), .excel-report-container td:nth-child(5) { width: 10%; }
+    .excel-report-container th:nth-child(6), .excel-report-container td:nth-child(6) { width: 25%; }
+    th:nth-child(7), td:nth-child(7) { width: 48%; }
+    th:nth-child(8), td:nth-child(8) { width: 15%; }
+    .image-preview { height: 100px; margin: 2px; display: inline-block; object-fit: cover; border: 2px solid transparent; cursor: pointer; }
+    .image-selected { border-color: red; }
+    .result-pass { background-color: #c6efce; color: black; }
+    .result-fail { background-color: #ffc7ce; color: black; }
+    .result-fail-accept { background-color: #ffeb9c; color: black; }
+    .result-data { background-color: #d9d9d9; color: black; }
+    .filter-controls, #uploadExcel, #generatePDF {
+      margin: 10px 0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .hidden-cols .col-category,
+    .hidden-cols .col-test-level,
+    .hidden-cols .col-factory { display: none; }
+    @media print {
+      .filter-controls, #uploadExcel, #generatePDF,
+      button[onclick^='addPhoto'], button[onclick^='enablePhotoDelete'] {
+        display: none !important;
+      }
+      select {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .result-pass, .result-fail, .result-fail-accept, .result-data {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="confidential-header">
+    CONFIDENTIAL DOCUMENT - FOR INTERNAL USE ONLY
+  </div>
+
+  <div class="four-hands-body">
+    <table class="no-border" style="width: 100%; margin-bottom: 20px;">
+      <tr>
+        <td style="width: 60px;">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTltHxu6C5AUofk_3Rl2TxDTkvJ5T7lpS6ahCGQfWpXCxdRmMDOI8Omlofnw-xMmUu7QmE&usqp=CAU" alt="Logo Công ty Phúc Thắng" width="60" height="auto">
+
+        </td>
+        <td style="text-align: left;">
+          <div style="font-size: 20px; font-weight: bold;">PHUC THANG FINE FURNUTURE</div>
+
+          <div style="font-size: 18px;"><strong>IN-HOUSE TEST REPORT</strong></div>
+        </td>
+      </tr>
+    </table>
+
+    <table class="four-hands-table general-info-table">
+      <tr>
+        <td class="four-hands-td">FH Colorway Code</td>
+        <td class="four-hands-td"><input type="text" /></td>
+        <td class="four-hands-td">Test Result</td>
+        <td class="four-hands-td">
+          <select id="testResult" class="test-result-select" onchange="updateTestResultColor(this)">
+            <option value="">Select</option>
+            <option value="PASS">PASS</option>
+            <option value="FAIL">FAIL</option>
+            <option value="FAIL-ACCEPT">FAIL-ACCEPT</option>
+            <option value="DATA">DATA</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="four-hands-td">Item Description</td>
+        <td class="four-hands-td" colspan="3">
+          <textarea rows="3" maxlength="300" placeholder="Enter item description..."></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="four-hands-td">Category</td>
+        <td class="four-hands-td">
+          <select>
+            <option value="">Select</option>
+            <option>HW</option>
+            <option>Table</option>
+            <option>Bed</option>
+            <option>Seating</option>
+            <option>Casegood</option>
+            <option>Lamp</option>
+          </select>
+        </td>
+        <td class="four-hands-td">Test Level</td>
+        <td class="four-hands-td">
+          <select>
+            <option value="">Select</option>
+            <option>HOSPITALITY</option>
+            <option>RESIDENTIAL</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="four-hands-td">Factory</td>
+        <td class="four-hands-td"><input type="text" /></td>
+        <td class="four-hands-td">Date of Test</td>
+        <td class="four-hands-td"><input type="date" /></td>
+      </tr>
+
+      <tr>
+        <td class="four-hands-td">Test #</td>
+        <td class="four-hands-td">
+          <select>
+            <option value="">Select</option>
+            <option>1ST TEST</option>
+            <option>RE-TEST</option>
+          </select>
+        </td>
+        <td class="four-hands-td">Pre-test reason</td>
+        <td class="four-hands-td">
+          <select>
+            <option value="">Select</option>
+            <option>REQUEST FROM CLIENT</option>
+            <option>QUALITY ISSUE</option>
+            <option>ASTM F2057-23</option>
+            <option>RANDOM TEST</option>
+            <option>OTHER</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="four-hands-td">Remarks</td>
+        <td class="four-hands-td" colspan="3">
+          <textarea rows="3" maxlength="300" placeholder="Enter remarks..."></textarea>
+        </td>
+      </tr>
+    </table>
+
+    <table class="four-hands-table">
+      <tr class="section-title">
+        <td class="four-hands-td">Test Images (Primary / Group)</td>
+      </tr>
+      <tr>
+        <td class="image-cell four-hands-td" id="imageUploadContainer">
+          <div class="image-upload-block" style="display:inline-block; position: relative; margin: 10px;">
+            <input type="checkbox" class="image-checkbox" style="position:absolute; top:5px; left:5px; display:none;" />
+            <img />
+            <div class="image-upload-container">
+              <label class="upload">Upload
+                <input type="file" accept="image/*" onchange="handleImageUpload(event, this)" />
+              </label>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="four-hands-td" style="text-align: center;">
+          <button type="button" onclick="addImageUpload()">+ Add Image</button>
+          <button type="button" onclick="toggleDeleteMode()">🗑️ Select Images to Delete</button>
+          <button type="button" id="confirmDeleteBtn" onclick="deleteSelectedImages()" style="display:none;">Confirm Delete</button>
+        </td>
+      </tr>
+    </table>
+
+    <table class="four-hands-table" style="width: 100%;">
+      <thead>
+        <tr>
+          <th class="four-hands-th" style="width: 33%;">Performed by</th>
+          <th class="four-hands-th" style="width: 33%;">Reported by</th>
+          <th class="four-hands-th" style="width: 33%;">Approved by</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="four-hands-td signature-cell"><input type="text" placeholder="[Tên]" /></td>
+          <td class="four-hands-td signature-cell"><input type="text" placeholder="[Tên]" /></td>
+          <td class="four-hands-td signature-cell"><input type="text" value="Pham Cong Vinh - QA Supervisor" disabled /></td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <table class="four-hands-table">
+      <tr class="section-title"><td class="four-hands-td" colspan="3">PRODUCT DIMENSIONS AND WEIGHT</td></tr>
+      <tr>
+        <th class="four-hands-th"></th><th class="four-hands-th">in / lbs</th><th class="four-hands-th">mm / kg</th>
+      </tr>
+      <tr>
+        <td class="four-hands-td">Depth</td>
+        <td class="four-hands-td"><input type="number" id="depthIn" oninput="convertToMM(this, 'depthMm')" /></td>
+        <td class="four-hands-td"><input type="number" id="depthMm" oninput="convertToInch(this, 'depthIn')" /></td>
+      </tr>
+      <tr>
+        <td class="four-hands-td">Width</td>
+        <td class="four-hands-td"><input type="number" id="widthIn" oninput="convertToMM(this, 'widthMm')" /></td>
+        <td class="four-hands-td"><input type="number" id="widthMm" oninput="convertToInch(this, 'widthIn')" /></td>
+      </tr>
+      <tr>
+        <td class="four-hands-td">Height</td>
+        <td class="four-hands-td"><input type="number" id="heightIn" oninput="convertToMM(this, 'heightMm')" /></td>
+        <td class="four-hands-td"><input type="number" id="heightMm" oninput="convertToInch(this, 'heightIn')" /></td>
+      </tr>
+      <tr>
+        <td class="four-hands-td">Weight</td>
+        <td class="four-hands-td"><input type="number" id="weightLbs" oninput="convertToKg(this, 'weightKg')" /></td>
+        <td class="four-hands-td"><input type="number" id="weightKg" oninput="convertToLbs(this, 'weightLbs')" /></td>
+      </tr>
+    </table>
+
+    <div class="drawer-body">
+      <div id="drawerHeader">
+        <span>Functional Drawer Volumes:</span>
+        <button class="toggle-btn" onclick="toggleTable()" id="toggleBtn">-</button>
+      </div>
+
+      <div id="drawerContent">
+        <div class="note" id="standardNote">
+          <label for="standard">Select Standard:</label>
+          <select id="standard" onchange="calculateAll()">
+            <option value="ASTM">ASTM F2057-23</option>
+            <option value="BIFMA">BIFMA</option>
+          </select>
+        </div>
+        <div id="drawerTable">
+          <table class="drawer-table">
+            <thead>
+              <tr>
+                <th class="drawer-th">Title</th>
+                <th class="drawer-th">Drawer Style #1</th>
+                <th class="drawer-th">Drawer Style #2</th>
+                <th class="drawer-th">Drawer Style #3</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+            <tfoot>
+              <tr>
+                <td class="label-cell drawer-td">Total Volume (cu ft)</td>
+                <td class="drawer-td" colspan="3"><input id="totalVolumeCuFt" class="full-input" type="text" disabled></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+    </div>
+
+  <hr> <div class="excel-report-container">
+    <h2>Product Test Report (from Trang3.html)</h2>
+    <div class="filter-controls">
+      <label>Category:
+        <select id="filterCategory"><option value="">All</option></select>
+      </label>
+      <label>Test Level:
+        <select id="filterTestLevel"><option value="">All</option></select>
+      </label>
+      <label>Factory:
+        <select id="filterFactory"><option value="">All</option></select>
+      </label>
+      <button onclick="applyFilters()">Filter</button>
+      <button onclick="toggleColumns()">Show/Hide Category/Test Level/Factory</button>
+    </div>
+
+    <input type="file" id="uploadExcel" accept=".xlsx, .xls" />
+    <button id="generatePDF" onclick="generatePDF()">Export to PDF</button>
+    <div id="excelData"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    // Javascript from Trang3.html
+    let originalData = [];
+    let hiddenColumns = false;
+
+    document.getElementById('uploadExcel').addEventListener('change', handleFile);
+
+    function handleFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', header: 1 });
+        const headers = rows[0].map(h => h?.toString().trim().toUpperCase() || '');
+        const dataRows = rows.slice(1);
+
+        const json = dataRows.map(row => {
+          let obj = {};
+          headers.forEach((key, i) => {
+            obj[key] = row[i] || '';
+          });
+          return obj;
+        });
+
+        originalData = json;
+        document.getElementById('filterCategory').innerHTML = '<option value="">All</option>';
+        document.getElementById('filterTestLevel').innerHTML = '<option value="">All</option>';
+        document.getElementById('filterFactory').innerHTML = '<option value="">All</option>';
+        populateFilters(json);
+        renderTable(json);
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function populateFilters(data) {
+      const catSet = new Set(), testSet = new Set(), facSet = new Set();
+      data.forEach(r => {
+        catSet.add(r['CATEGORY']);
+        testSet.add(r['TEST LEVEL']);
+        facSet.add(r['FACTORY']);
+      });
+      document.getElementById('filterCategory').innerHTML += [...catSet].map(c => `<option value="${c}">${c}</option>`).join('');
+      document.getElementById('filterTestLevel').innerHTML += [...testSet].map(c => `<option value="${c}">${c}</option>`).join('');
+      document.getElementById('filterFactory').innerHTML += [...facSet].map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function applyFilters() {
+      const cat = document.getElementById('filterCategory').value;
+      const level = document.getElementById('filterTestLevel').value;
+      const fac = document.getElementById('filterFactory').value;
+      const filtered = originalData.filter(row =>
+        (!cat || row['CATEGORY'] === cat) &&
+        (!level || row['TEST LEVEL'] === level) &&
+        (!fac || row['FACTORY'] === fac)
+      );
+      renderTable(filtered);
+    }
+
+    function toggleColumns() {
+      hiddenColumns = !hiddenColumns;
+      document.getElementById('excelData').classList.toggle('hidden-cols', hiddenColumns);
+    }
+
+    function renderTable(data) {
+      let html = '<table><tr>' +
+        '<th>No.</th>' +
+        '<th class="col-factory">Factory</th>' +
+        '<th class="col-category">Category</th>' +
+        '<th class="col-test-level">TEST LEVEL</th>' +
+        '<th>ITEM TO TEST</th>' +
+        '<th>TEST METHOD</th>' +
+        '<th>PHOTO OF TEST</th>' +
+        '<th>RESULT</th>' +
+        '</tr>';
+
+      data.forEach((row, i) => {
+        let photoHtml = `
+          <div class='photo-test' id='photo-${i}' style='min-height:110px'></div>
+          <button onclick='addPhoto(${i})'>Add Photo</button>
+          <button onclick='enablePhotoDelete(${i})'>Select & Delete</button>
+        `;
+        html += '<tr>' +
+          `<td>${row['NO.'] || ''}</td>` +
+          `<td class="col-factory">${row['FACTORY'] || ''}</td>` +
+          `<td class="col-category">${row['CATEGORY'] || ''}</td>` +
+          `<td class="col-test-level">${row['TEST LEVEL'] || ''}</td>` +
+          `<td>${row['ITEM TO TEST'] || ''}</td>` +
+          `<td>${row['TEST METHOD'] || ''}</td>` +
+          `<td>${photoHtml}</td>` +
+          `<td><select onchange="changeResultColor(this)">
+            <option value="">Select</option>
+            <option value="PASS">PASS</option>
+            <option value="FAIL">FAIL</option>
+            <option value="FAIL-ACCEPT">FAIL-ACCEPT</option>
+            <option value="DATA">DATA</option>
+          </select></td>` +
+          '</tr>';
+      });
+
+      html += '</table>';
+      document.getElementById('excelData').innerHTML = html;
+      if (hiddenColumns) toggleColumns();
+    }
+
+    function addPhoto(index) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'image-preview';
+          img.onclick = () => img.classList.toggle('image-selected');
+          document.getElementById(`photo-${index}`).appendChild(img);
+        }
+        reader.readAsDataURL(event.target.files[0]);
+      }
+      input.click();
+    }
+
+    function enablePhotoDelete(index) {
+      const selected = document.querySelectorAll(`#photo-${index} .image-selected`);
+      if (selected.length === 0) {
+        alert('Click vào ảnh để chọn, sau đó nhấn lại nút để xác nhận xóa.');
+        return;
+      }
+      if (confirm(`Xóa ${selected.length} ảnh đã chọn?`)) {
+        selected.forEach(img => img.remove());
+      }
+    }
+
+    function changeResultColor(select) {
+      select.className = '';
+      switch (select.value) {
+        case 'PASS': select.classList.add('result-pass'); break;
+        case 'FAIL': select.classList.add('result-fail'); break;
+        case 'FAIL-ACCEPT': select.classList.add('result-fail-accept'); break;
+        case 'DATA': select.classList.add('result-data'); break;
+      }
+    }
+
+    function generatePDF() {
+      window.print();
+    }
+
+    // Javascript from FourHands_Test_Report_MultiImage_Delete.html
+    function updateTestResultColor(select) {
+      const value = select.value;
+      const colorMap = {
+        "PASS": "#28a745",
+        "FAIL": "#dc3545",
+        "FAIL-ACCEPT": "#fd7e14",
+        "DATA": "#6c757d"
+      };
+      select.style.backgroundColor = colorMap[value] || "#fff";
+      select.style.color = value ? "white" : "black";
+    }
+
+    function convertToMM(input, outputId) {
+      const inch = parseFloat(input.value);
+      const mm = isNaN(inch) ? '' : (inch * 25.4).toFixed(2);
+      document.getElementById(outputId).value = mm;
+    }
+
+    function convertToInch(input, outputId) {
+      const mm = parseFloat(input.value);
+      const inch = isNaN(mm) ? '' : (mm / 25.4).toFixed(2);
+      document.getElementById(outputId).value = inch;
+    }
+
+    function convertToKg(input, outputId) {
+      const lbs = parseFloat(input.value);
+      const kg = isNaN(lbs) ? '' : (lbs * 0.453592).toFixed(2);
+      document.getElementById(outputId).value = kg;
+    }
+
+    function convertToLbs(input, outputId) {
+      const kg = parseFloat(input.value);
+      const lbs = isNaN(kg) ? '' : (kg / 0.453592).toFixed(2);
+      document.getElementById(outputId).value = lbs;
+    }
+
+    function handleImageUpload(event, inputElement) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = inputElement.closest('.image-upload-block').querySelector('img');
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function addImageUpload() {
+      const container = document.getElementById('imageUploadContainer');
+      const newBlock = document.createElement('div');
+      newBlock.className = 'image-upload-block';
+      newBlock.style = 'display:inline-block; position:relative; margin:10px;';
+      newBlock.innerHTML = `
+        <input type="checkbox" class="image-checkbox" style="position:absolute; top:5px; left:5px; display:none;" />
+        <img />
+        <div class="image-upload-container">
+          <label class="upload">Upload
+            <input type="file" accept="image/*" onchange="handleImageUpload(event, this)" />
+          </label>
+        </div>
+      `;
+      container.appendChild(newBlock);
+    }
+
+    function toggleDeleteMode() {
+      const checkboxes = document.querySelectorAll('.image-checkbox');
+      const confirmBtn = document.getElementById('confirmDeleteBtn');
+      const isActive = confirmBtn.style.display === 'inline-block';
+
+      checkboxes.forEach(cb => {
+        cb.style.display = isActive ? 'none' : 'inline-block';
+        cb.checked = false;
+      });
+
+      confirmBtn.style.display = isActive ? 'none' : 'inline-block';
+    }
+
+    function deleteSelectedImages() {
+      const checkboxes = document.querySelectorAll('.image-checkbox:checked');
+      checkboxes.forEach(cb => {
+        const block = cb.closest('.image-upload-block');
+        if (block) block.remove();
+      });
+      toggleDeleteMode();
+    }
+
+    // Javascript from Trang2.html
+    const styles = [1, 2, 3];
+    const fields = [
+      { label: 'Description', type: 'text' },
+      { label: 'Drawer Qty', type: 'number' },
+      { label: 'Inside Width', units: ['in', 'mm'] },
+      { label: 'Inside Depth', units: ['in', 'mm'] },
+      { label: 'Inside Height', units: ['in', 'mm'] },
+      { label: 'Volume', units: ['cu ft', 'm³'], disabled: true },
+      { label: 'Drawer Loading', units: ['lbs', 'kg'], disabled: true },
+    ];
+
+    function createRow(field) {
+      const row = [`<td class='label-cell'>${field.label}</td>`];
+      styles.forEach(i => {
+        if (!field.units) {
+          const id = `${field.label.toLowerCase().replace(/[^a-z0-9]/gi, '')}${i}`;
+          const event = 'oninput="calculateAll()"';
+          row.push(`<td><input type="text" class="full-input" id="${id}" ${event}/></td>`);
+        } else {
+          const id1 = `${field.label.toLowerCase().replace(/\s/g, '')}${field.units[0]}${i}`;
+          const id2 = `${field.label.toLowerCase().replace(/\s/g, '')}${field.units[1]}${i}`;
+          const dis = field.disabled ? 'disabled' : '';
+          row.push(`<td><div class="horizontal">
+            <div><input class="unit-input" id="${id1}" ${dis} oninput="handleInput(${i}, '${field.label}', '${field.units[0]}')"><span class="unit-label">${field.units[0]}</span></div>
+            <div><input class="unit-input" id="${id2}" ${dis} oninput="handleInput(${i}, '${field.label}', '${field.units[1]}')"><span class="unit-label">${field.units[1]}</span></div>
+          </div></td>`);
+        }
+      });
+      return `<tr>${row.join('')}</tr>`;
+    }
+
+    document.getElementById("table-body").innerHTML = fields.map(createRow).join('');
+
+    function handleInput(index, field, unit) {
+      const fieldId = field.toLowerCase().replace(/\s/g, '');
+      const from = document.getElementById(`${fieldId}${unit}${index}`);
+      const toUnit = unit === 'in' ? 'mm' : unit === 'mm' ? 'in' : unit === 'cu ft' ? 'm³' : 'cu ft';
+      const to = document.getElementById(`${fieldId}${toUnit}${index}`);
+      if (!from || !to) return;
+      const raw = from.value;
+      const nums = raw.match(/\d*\.?\d+/g)?.map(Number) || [];
+      const avg = nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : 0;
+      const converted = unit === 'in' ? avg * 25.4 : unit === 'mm' ? avg / 25.4 : unit === 'cu ft' ? avg * 0.0283168 : avg / 0.0283168;
+      from.setAttribute("data-value-clean", avg.toFixed(2));
+      to.setAttribute("data-value-clean", converted.toFixed(2));
+      to.value = converted.toFixed(2);
+      calculateAll();
+    }
+
+    function calculateAll() {
+      const standard = document.getElementById("standard").value;
+      let totalVolume = 0;
+      styles.forEach(i => {
+        const w = parseFloat(document.getElementById(`insidewidthin${i}`)?.getAttribute("data-value-clean")) || 0;
+        const d = parseFloat(document.getElementById(`insidedepthin${i}`)?.getAttribute("data-value-clean")) || 0;
+        const h = parseFloat(document.getElementById(`insideheightin${i}`)?.getAttribute("data-value-clean")) || 0;
+        const qtyEl = document.getElementById(`drawerqty${i}`);
+        const qty = qtyEl && !isNaN(qtyEl.value) ? parseFloat(qtyEl.value) : 0;
+
+        let vol = 0;
+        if (w > 0 && d > 0 && h > 0) {
+          vol = (w * d * h) / 1728;
+        }
+        const volM3 = vol * 0.0283168;
+
+        let kg = 0, lbs = 0;
+        if (vol > 0) {
+          if (standard === 'ASTM') {
+            lbs = vol * 8.5;
+            kg = lbs * 0.453592;
+          } else {
+            kg = volM3 * 470;
+            lbs = kg * 2.2;
+          }
+        }
+
+        if (vol > 0) {
+          document.getElementById(`volumecu ft${i}`).value = vol.toFixed(2);
+          document.getElementById(`volumem³${i}`).value = volM3.toFixed(4);
+          document.getElementById(`drawerloadinglbs${i}`).value = lbs.toFixed(1);
+          document.getElementById(`drawerloadingkg${i}`).value = kg.toFixed(1);
+        } else {
+          ["volumecu ft", "volumem³", "drawerloadinglbs", "drawerloadingkg"].forEach(prefix => {
+            const el = document.getElementById(`${prefix}${i}`);
+            if (el) el.value = "";
+          });
+        }
+
+        if (vol > 0 && qty > 0) {
+          totalVolume += vol * qty;
+        }
+      });
+      document.getElementById("totalVolumeCuFt").value = totalVolume.toFixed(2);
+    }
+
+    function toggleTable() {
+      const content = document.getElementById("drawerContent");
+      const header = document.getElementById("drawerHeader");
+      const btn = document.getElementById("toggleBtn");
+      const isHidden = content.style.display === "none";
+      content.style.display = isHidden ? "block" : "none";
+      if (isHidden) {
+        header.style.display = "flex";
+        btn.textContent = "-";
+      } else {
+        header.style.display = "none";
+        document.body.insertAdjacentHTML('afterbegin', `
+          <button class="toggle-btn" id="restoreToggleBtn" onclick="restoreHeader()" style="margin-bottom: 10px;">+</button>
+        `);
+      }
+    }
+
+    function restoreHeader() {
+      document.getElementById("drawerContent").style.display = "block";
+      document.getElementById("drawerHeader").style.display = "flex";
+      const btn = document.getElementById("restoreToggleBtn");
+      if (btn) btn.remove();
+    }
+  </script>
+</body>
+</html>
